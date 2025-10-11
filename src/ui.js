@@ -1,6 +1,6 @@
-import {_query, applyFilter, isEligiblePage, loadRefsForCurrentPage, refresh} from "./api.js";
+import {_query, applyFilter, loadRefsForCurrentPage, refresh} from "./api.js";
 import {alphabet, alphaIndex, encodeAttr, groupKey, linkifyContent} from "./utils.js";
-import {closeSettings, getSettings, setCopyFormat, setShowInUserNs, toggleSettings} from "./settings.js";
+import {bindSettingsEvents, buildSettingsUI, getSettings,} from "./settings.js";
 import {injectStyles} from "./styles.js";
 
 export const ids = {
@@ -29,12 +29,48 @@ let _scrollEl;
 
 export function initUI() {
     if (document.getElementById(ids.root)) return;
-    // Stop early on disallowed namespaces or content models
-    if (!isEligiblePage()) return;
     injectStyles();
+    injectDOMElements();
     buildUI();
     bindEvents();
     collapse();
+}
+
+function injectDOMElements() {
+    const s = getSettings();
+    if (!s.showCiteRefCopyBtn) return;
+
+    const permalink = `Special:Permalink/${mw.config.get('wgRevisionId')}`;
+
+    const supElements = document.querySelectorAll('sup[id^="cite_ref-"]');
+    supElements.forEach(sup => {
+        const copyBtn = document.createElement('a');
+        copyBtn.className = 'qeec-ref-tag-copy-btn qeec-badge';
+        copyBtn.href = '#';
+        copyBtn.title = 'Copy citation permalink';
+        copyBtn.setAttribute('aria-label', 'Copy citation permalink');
+        copyBtn.textContent = 'Copy permalink';
+        copyBtn.style.marginRight = '2px';
+        // On click, copy the permalink to clipboard
+        copyBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            let linkText = sup.id.replace('cite_ref-', '');
+            if (linkText.indexOf('_') !== -1) {  // if linkText contains an underscore, only keep the part after the last underscore
+                const parts = linkText.split('_');
+                linkText = parts[parts.length - 1];
+            }
+            const fullLink = `[[${permalink}#${sup.id}|#${linkText}]]`;
+            copyToClipboard(fullLink);
+            // Provide visual feedback
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+            }, 1000);
+        });
+        // Append the button to the sup element
+        sup.appendChild(copyBtn);
+    });
 }
 
 function buildUI() {
@@ -74,12 +110,7 @@ function buildUI() {
     panel.appendChild(body);
 
     // Settings dialog (initially hidden)
-    const settings = document.createElement('section');
-    settings.id = ids.settingsDialog;
-    settings.setAttribute('role', 'dialog');
-    settings.setAttribute('aria-modal', 'false');
-    settings.innerHTML = '' + '<button id="' + ids.settingsClose + '" class="qeec-close" type="button" aria-label="Close">×</button>' + '<h3>Settings</h3>' + '<fieldset class="qeec-fieldset">' + '  <legend>When you click a citation name, copy as:</legend>' + '  <div class="qeec-row"><label><input type="radio" name="qeec-copyformat" value="raw"> Raw name</label></div>' + '  <div class="qeec-row"><label><input type="radio" name="qeec-copyformat" value="r"> {{r|…}}</label></div>' + '  <div class="qeec-row"><label><input type="radio" name="qeec-copyformat" value="ref"> &lt;ref name="…" /&gt;</label></div>' + '</fieldset>' + // Added visibility setting:
-        '<fieldset class="qeec-fieldset">' + '  <legend>Visibility</legend>' + '  <div class="qeec-row"><label><input type="checkbox" name="qeec-show-user-ns" value="1"> Show in User namespace</label></div>' + '</fieldset>';
+    const settings = buildSettingsUI();
     panel.appendChild(settings);
 
     root.appendChild(panel);
@@ -115,27 +146,7 @@ function bindEvents() {
         });
     }
 
-    const settingsBtn = document.getElementById(ids.settingsBtn);
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', function () {
-            toggleSettings();
-        });
-    }
-
-    const settingsDlg = document.getElementById(ids.settingsDialog);
-    if (settingsDlg) {
-        settingsDlg.addEventListener('change', function (e) {
-            if (e.target && e.target.name === 'qeec-copyformat') {
-                setCopyFormat(e.target.value);
-            } else if (e.target && e.target.name === 'qeec-show-user-ns') {
-                setShowInUserNs(!!e.target.checked);
-            }
-        });
-        const closeBtn = document.getElementById(ids.settingsClose);
-        if (closeBtn) closeBtn.addEventListener('click', function () {
-            closeSettings();
-        });
-    }
+    bindSettingsEvents();
 
     // Top-right custom resizer
     const resizerEl = document.querySelector('#' + ids.panel + ' .qeec-resizer');
@@ -284,6 +295,7 @@ export function renderRefList(items) {
             const badge = document.createElement('span');
             badge.className = 'qeec-badge';
             badge.textContent = 'Copied!';
+            badge.style.marginRight = '6px';
             nameEl.insertAdjacentElement('afterend', badge);
             setTimeout(function () {
                 badge.remove();

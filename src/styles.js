@@ -13,6 +13,13 @@ export function injectStyles() {
 }
 #${ids.root} * { box-sizing: border-box; }
 
+sup[id^="cite_ref-"] .qeec-ref-tag-copy-btn { display: none; }
+sup[id^="cite_ref-"]:hover .qeec-ref-tag-copy-btn { display: inline-block; }
+
+.qeec-badge { font-size: 10px; padding: 1px 4px; border-radius: 4px; background: #36c; color: #fff; animation: qeec-pop .9s ease; }
+.qeec-badge:hover { color: #fff; text-decoration: none; }
+@keyframes qeec-pop { 0% { opacity: 0; transform: translateY(-2px); } 20% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
+
 #${ids.collapsedBtn} {
   display: inline-flex;
   align-items: center;
@@ -108,8 +115,6 @@ export function injectStyles() {
 #${ids.body} .qeec-index button { background: none; border: none; padding: 0; font-size: 11px; line-height: 1; cursor: pointer; color: #202122; }
 #${ids.body} .qeec-index button.qeec-disabled { opacity: .35; pointer-events: none; cursor: default; }
 #${ids.body} .qeec-listwrap { flex: 1 1 auto; overflow: auto; }
-#${ids.body} .qeec-badge { margin-right: 6px; font-size: 10px; padding: 1px 4px; border-radius: 4px; background: #36c; color: #fff; animation: qeec-pop .9s ease; }
-@keyframes qeec-pop { 0% { opacity: 0; transform: translateY(-2px); } 20% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
 #${ids.body} .qeec-placeholder { font-size: 13px; color: #54595d; }
 
 #${ids.list} { list-style: none; margin: 0; padding: 0; }

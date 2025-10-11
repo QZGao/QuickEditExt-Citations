@@ -29,5 +29,8 @@ mw.loader.load("//meta.wikimedia.org/w/index.php?title=User:SuperGrey/gadgets/Qu
 
 ### Build from source
 
-To build from source, clone this repository and run `npm install` to install dependencies. Then run `npm run build` to generate the distributable file `QuickEditExt-Citations.js` in the `dist` folder.
+To build from source, clone this repository and run `npm install` to install dependencies.
+
+Then run `npm run build` to generate the distributable file `bundled.js` in the `dist` folder.
+
 You can then add the generated file to your common.js or global.js page as described above.

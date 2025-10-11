@@ -56,7 +56,6 @@ export function isEligiblePage() {
     // Check content model without an API call if available
     const cm = mw.config && mw.config.get('wgPageContentModel');
     return !(cm && cm !== 'wikitext');
-
 }
 
 export function refresh() {
