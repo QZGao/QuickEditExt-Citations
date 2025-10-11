@@ -14,6 +14,7 @@ By default, it will show on all pages in Main, User, and Draft namespaces with w
 off the visibility in User namespace through Settings.
 
 ## Usage
+### Distributed version
 
 To use QuickEditExt-Citations on one of the supported wikis, or install it on all wikis:
 
@@ -25,3 +26,8 @@ To use QuickEditExt-Citations on one of the supported wikis, or install it on al
 ```javascript
 mw.loader.load("//meta.wikimedia.org/w/index.php?title=User:SuperGrey/gadgets/QuickEditExt-Citations.js&action=raw&ctype=text/javascript"); // Backlink: [[meta:User:SuperGrey/gadgets/QuickEditExt-Citations]]
 ```
+
+### Build from source
+
+To build from source, clone this repository and run `npm install` to install dependencies. Then run `npm run build` to generate the distributable file `QuickEditExt-Citations.js` in the `dist` folder.
+You can then add the generated file to your common.js or global.js page as described above.

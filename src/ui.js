@@ -356,7 +356,7 @@ export function rebuildIndex(firstByBucket) {
             btn.addEventListener('click', function () {
                 const target = firstByBucket[lab];
                 if (!target) return;
-                target.scrollIntoView({block: 'start', inline: 'nearest', behavior: 'smooth'});
+                target.scrollIntoView({block: 'nearest', inline: 'start', behavior: 'smooth'});
             });
         }
         _indexCol.appendChild(btn);
