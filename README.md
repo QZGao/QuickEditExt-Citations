@@ -15,7 +15,7 @@ off the visibility in User namespace through Settings.
 
 ## Usage
 
-To use Select-a-lot on one of the supported wikis, or install it on all wikis:
+To use QuickEditExt-Citations on one of the supported wikis, or install it on all wikis:
 
 - For one wiki: Add the following line to your common.js page on that wiki (
   e.g. [English Wikipedia common.js](https://en.wikipedia.org/wiki/Special:MyPage/common.js)).

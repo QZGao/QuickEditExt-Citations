@@ -1,5 +1,3 @@
-import {_query} from "./api.js";
-
 let _alpha;
 let _alphaIndex;
 
@@ -33,7 +31,7 @@ export function encodeAttr(val) {
     return String(val).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 }
 
-export function linkifyContent(text) {
+export function linkifyContent(text, query) {
     const frag = document.createDocumentFragment();
     if (!text) {
         frag.appendChild(document.createTextNode(''));
@@ -47,7 +45,7 @@ export function linkifyContent(text) {
         if (m.index > lastIndex) {
             const plain = text.slice(lastIndex, m.index);
             const span = document.createElement('span');
-            span.innerHTML = highlightHTML(plain, _query || '');
+            span.innerHTML = highlightHTML(plain, query || '');
             frag.appendChild(span);
         }
         const url = m[1];
@@ -55,14 +53,14 @@ export function linkifyContent(text) {
         a.href = url;
         a.target = '_blank';
         a.rel = 'nofollow noopener';
-        a.innerHTML = highlightHTML(url, _query || '');
+        a.innerHTML = highlightHTML(url, query || '');
         frag.appendChild(a);
         lastIndex = re.lastIndex;
     }
     if (lastIndex < text.length) {
         const rest = text.slice(lastIndex);
         const span2 = document.createElement('span');
-        span2.innerHTML = highlightHTML(rest, _query || '');
+        span2.innerHTML = highlightHTML(rest, query || '');
         frag.appendChild(span2);
     }
     return frag;

@@ -3,8 +3,8 @@ import {_rows, ids, rebuildIndex, renderMessage, renderRefList} from "./ui.js";
 import {getSettings} from "./settings.js";
 
 let hasFetched = false;
-export let _query;
-
+let inFlight = null;
+export let _query = '';
 
 // Filtering & highlight helpers
 export function applyFilter(q) {
@@ -63,18 +63,21 @@ export function refresh() {
     const btn = document.getElementById(ids.refreshBtn);
     if (btn) btn.setAttribute('aria-busy', 'true');
     renderMessage('Refreshing…');
-    loadRefsForCurrentPage().finally ? loadRefsForCurrentPage().finally(function () {
-        if (btn) btn.removeAttribute('aria-busy');
-    }) : loadRefsForCurrentPage().then(function () {
-        if (btn) btn.removeAttribute('aria-busy');
-    }, function () {
-        if (btn) btn.removeAttribute('aria-busy');
-    });
+    const p = loadRefsForCurrentPage(true);
+    const done = function () { if (btn) btn.removeAttribute('aria-busy'); };
+    if (p && typeof p.finally === 'function') {
+        p.finally(done);
+    } else if (p && typeof p.then === 'function') {
+        p.then(done, done);
+    } else {
+        done();
+    }
 }
 
-export function loadRefsForCurrentPage() {
-    if (hasFetched) return;
-    hasFetched = true;
+export function loadRefsForCurrentPage(force = false) {
+    // Debounce concurrent calls
+    if (inFlight) return inFlight;
+    if (hasFetched && !force) return Promise.resolve();
 
     const title = mw.config && mw.config.get('wgPageName');
     if (!title) {
@@ -82,7 +85,7 @@ export function loadRefsForCurrentPage() {
         return Promise.resolve();
     }
     const api = new mw.Api();
-    return api.get({
+    inFlight = api.get({
         action: 'query', prop: 'revisions', rvprop: 'content', rvslots: 'main', formatversion: 2, titles: title
     }).then(function (data) {
         try {
@@ -94,12 +97,16 @@ export function loadRefsForCurrentPage() {
             const content = pages[0].revisions[0].slots.main.content || '';
             const refs = extractNamedRefs(content);
             renderRefList(refs);
+            hasFetched = true;
         } catch (err) {
             renderMessage('Failed to parse API response.');
         }
     }).catch(function (err) {
         renderMessage('API error: ' + (err && err.error && err.error.info || err && err.toString() || 'Unknown'));
+    }).finally(function () {
+        inFlight = null;
     });
+    return inFlight;
 }
 
 function extractNamedRefs(wikitext) {
