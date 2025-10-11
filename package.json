@@ -1,0 +1,19 @@
+{
+  "name": "quickeditext-citations",
+  "version": "1.0.1",
+  "description": "User script to display all named citations on the MediaWiki page",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/QZGao/QuickEditExt-Citations.git"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.5"
+  },
+  "private": true
+}

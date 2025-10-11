@@ -3,4 +3,5 @@
 .idea/
 
 # Project files
-*.sandbox.js
+node_modules/
+dist/
