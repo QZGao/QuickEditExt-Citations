@@ -1,5 +1,5 @@
 import {_query, applyFilter, loadRefsForCurrentPage, refresh} from "./api.js";
-import {alphabet, alphaIndex, encodeAttr, groupKey, linkifyContent} from "./utils.js";
+import {alphabet, alphaIndex, encodeAttr, getCommonPrefix, groupKey, linkifyContent} from "./utils.js";
 import {bindSettingsEvents, buildSettingsUI, getSettings,} from "./settings.js";
 import {injectStyles} from "./styles.js";
 
@@ -44,6 +44,22 @@ function injectDOMElements() {
 
     const supElements = document.querySelectorAll('sup[id^="cite_ref-"]');
     supElements.forEach(sup => {
+        const supLink = sup.querySelector('a[href^="#cite_note-"]');
+        if (!supLink) return;
+        let linkText = supLink.textContent.replace(/^\[|\]$/g, ''); // Remove surrounding brackets
+        let citeNoteStr = supLink.getAttribute('href').substring(11); // Remove '#cite_note-' prefix
+        let citeRefStr = sup.id.substring(9); // Remove 'cite_ref-' prefix
+        const linkTextCommon = getCommonPrefix(citeNoteStr, citeRefStr);
+        citeNoteStr = citeNoteStr.substring(linkTextCommon.length + 1);
+        citeRefStr = citeRefStr.substring(linkTextCommon.length + 1);
+        if (citeNoteStr !== citeRefStr) {
+            const LinkTextCommon2 = getCommonPrefix(citeNoteStr, citeRefStr);
+            citeRefStr = citeRefStr.substring(LinkTextCommon2.length);
+            if (citeRefStr) {
+                linkText = linkText + '.' + citeRefStr.substring(1);
+            }
+        }
+
         const copyBtn = document.createElement('a');
         copyBtn.className = 'qeec-ref-tag-copy-btn qeec-badge';
         copyBtn.href = '#';
@@ -54,11 +70,6 @@ function injectDOMElements() {
         // On click, copy the permalink to clipboard
         copyBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            let linkText = sup.id.replace('cite_ref-', '');
-            if (linkText.indexOf('_') !== -1) {  // if linkText contains an underscore, only keep the part after the last underscore
-                const parts = linkText.split('_');
-                linkText = parts[parts.length - 1];
-            }
             const fullLink = `[[${permalink}#${sup.id}|#${linkText}]]`;
             copyToClipboard(fullLink);
             // Provide visual feedback
