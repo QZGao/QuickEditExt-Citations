@@ -16,8 +16,9 @@ export function injectStyles() {
 sup[id^="cite_ref-"] .qeec-ref-tag-copy-btn { display: none; }
 sup[id^="cite_ref-"]:hover .qeec-ref-tag-copy-btn { display: inline-block; }
 
-.qeec-badge { font-size: 10px; padding: 1px 4px; border-radius: 4px; background: #36c; color: #fff; animation: qeec-pop .9s ease; }
+.qeec-badge { font-size: 10px; padding: 1px 4px; border-radius: 4px; background: #36c; color: #fff !important; animation: qeec-pop .9s ease; }
 .qeec-badge:hover { color: #fff; text-decoration: none; }
+.qeec-badge:visited { color: #fff; }
 @keyframes qeec-pop { 0% { opacity: 0; transform: translateY(-2px); } 20% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
 
 #${ids.collapsedBtn} {
