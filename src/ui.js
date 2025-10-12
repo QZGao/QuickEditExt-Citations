@@ -49,14 +49,18 @@ function injectDOMElements() {
         let linkText = supLink.textContent.replace(/^\[|\]$/g, ''); // Remove surrounding brackets
         let citeNoteStr = supLink.getAttribute('href').substring(11); // Remove '#cite_note-' prefix
         let citeRefStr = sup.id.substring(9); // Remove 'cite_ref-' prefix
-        const linkTextCommon = getCommonPrefix(citeNoteStr, citeRefStr);
-        citeNoteStr = citeNoteStr.substring(linkTextCommon.length + 1);
-        citeRefStr = citeRefStr.substring(linkTextCommon.length + 1);
         if (citeNoteStr !== citeRefStr) {
-            const LinkTextCommon2 = getCommonPrefix(citeNoteStr, citeRefStr);
-            citeRefStr = citeRefStr.substring(LinkTextCommon2.length);
-            if (citeRefStr) {
-                linkText = linkText + '.' + citeRefStr.substring(1);
+            // e.g. "Smith2020-1" vs "Smith2020_1-0"
+            const linkTextCommon = getCommonPrefix(citeNoteStr, citeRefStr);
+            citeNoteStr = citeNoteStr.substring(linkTextCommon.length + 1); // +1 to remove the underscore/hyphen
+            citeRefStr = citeRefStr.substring(linkTextCommon.length + 1); // +1 to remove the hyphen
+            if (citeNoteStr !== citeRefStr) {
+                // e.g. "1" vs "1-0"
+                const linkTextCommon2 = getCommonPrefix(citeNoteStr, citeRefStr);
+                citeRefStr = citeRefStr.substring(linkTextCommon2.length + 1); // +1 to remove the hyphen
+                if (citeRefStr) {
+                    linkText = linkText + '.' + citeRefStr;
+                }
             }
         }
 
