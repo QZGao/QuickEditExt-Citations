@@ -16,6 +16,53 @@ export function injectStyles() {
 sup[id^="cite_ref-"] .qeec-ref-tag-copy-btn { display: none; }
 sup[id^="cite_ref-"]:hover .qeec-ref-tag-copy-btn { display: inline-block; }
 
+/* New floating popup for citation copy action */
+.qeec-ref-popup {
+  position: absolute;
+  z-index: 100000;
+  display: none;
+  /* default to light appearance */
+  background: #ffffff;
+  color: #111827;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  box-shadow: 0 6px 12px rgba(16,24,40,0.08);
+  pointer-events: auto;
+  border: 1px solid #e5e7eb; /* light border */
+  transition: opacity .12s ease, transform .12s ease;
+  transform-origin: top left;
+  opacity: 0;
+}
+.qeec-ref-popup.is-open { display: block; opacity: 1; transform: translateY(0); }
+.qeec-ref-popup a.qeec-ref-popup-copy {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+}
+.qeec-ref-popup a.qeec-ref-popup-copy:active { opacity: 0.8; }
+
+@media (prefers-color-scheme: light) {
+  /* light mode: keep light look */
+  .qeec-ref-popup { 
+    background: #ffffff; 
+    color: #111827; 
+    border-color: #e5e7eb; 
+    box-shadow: 0 6px 12px rgba(16,24,40,0.06); 
+  }
+}
+@media (prefers-color-scheme: dark) {
+  /* dark mode: dark background, light text, darker border */
+  .qeec-ref-popup { 
+    background: #111827; 
+    color: #ffffff; 
+    border-color: #374151; 
+    box-shadow: 0 6px 12px rgba(0,0,0,0.6); 
+  }
+  .qeec-ref-popup a.qeec-ref-popup-copy { color: inherit; }
+}
+
 .qeec-badge { font-size: 10px; padding: 1px 4px; border-radius: 4px; background: #36c; color: #fff !important; animation: qeec-pop .9s ease; }
 .qeec-badge:hover { color: #fff; text-decoration: none; }
 .qeec-badge:visited { color: #fff; }

@@ -40,52 +40,162 @@ function injectDOMElements() {
     const s = getSettings();
     if (!s.showCiteRefCopyBtn) return;
 
-    const permalink = `Special:Permalink/${mw.config.get('wgRevisionId')}`;
+    // We'll create a single floating popup that will be shown when hovering/focusing
+    // a citation <sup>. This avoids layout shifts from inserting inline elements.
+    const popup = document.createElement('div');
+    popup.className = 'qeec-ref-popup';
+    popup.setAttribute('role', 'dialog');
+    popup.setAttribute('aria-hidden', 'true');
+    popup.style.display = 'none';
+    popup.innerHTML = '<a href="#" class="qeec-ref-popup-copy">Copy</a>';
+    document.body.appendChild(popup);
+    const popupLink = popup.querySelector('.qeec-ref-popup-copy');
 
-    const supElements = document.querySelectorAll('sup[id^="cite_ref-"]');
-    supElements.forEach(sup => {
+    // Helper to show popup for a given sup element with computed link text
+    let hideTimer = null;
+    function showPopupForSup(sup, linkText) {
+        if (!sup || !popup) return;
+        clearTimeout(hideTimer);
+        popup.setAttribute('aria-hidden', 'false');
+        popupLink.textContent = 'Copy permalink';
+
+        // Ensure popup is rendered so we can measure it
+        popup.style.display = 'block';
+        // add class to trigger opacity/transform transition
+        popup.classList.add('is-open');
+
+        // Force layout to obtain sizes
+        const rect = sup.getBoundingClientRect();
+        const popupRect = popup.getBoundingClientRect();
+        const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+
+        // Prefer to place popup above the <sup>, with a small gap
+        const gap = 3;
+        let top = window.scrollY + rect.top - popupRect.height - gap;
+        let left = window.scrollX + rect.left;
+
+        // If not enough space above, place below
+        if (top < window.scrollY + 4) {
+            top = window.scrollY + rect.bottom + gap;
+        }
+        // Prevent overflow to the right
+        if (left + popupRect.width > window.scrollX + viewportWidth - 8) {
+            left = window.scrollX + viewportWidth - popupRect.width - 8;
+        }
+        // Prevent overflow to the left
+        if (left < window.scrollX + 4) left = window.scrollX + 4;
+
+        popup.style.top = top + 'px';
+        popup.style.left = left + 'px';
+
+        // Store current data on popup for click handler
+        popup.dataset.qeecTargetId = sup.id;
+        popup.dataset.qeecLinkText = linkText;
+    }
+
+    function scheduleHidePopup(delay) {
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+            // remove open class to trigger transition
+            popup.classList.remove('is-open');
+            popup.setAttribute('aria-hidden', 'true');
+            // after transition completes, hide from layout
+            setTimeout(() => {
+                if (!popup.classList.contains('is-open')) {
+                    popup.style.display = 'none';
+                    delete popup.dataset.qeecTargetId;
+                    delete popup.dataset.qeecLinkText;
+                }
+            }, 180);
+        }, delay || 150);
+    }
+
+    // Click handler for the popup copy link
+    popupLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        const tgtId = popup.dataset.qeecTargetId;
+        const linkText = popup.dataset.qeecLinkText || '';
+        if (!tgtId) return;
+        const pageName = mw.config.get('wgPageName');
+        const fullLink = `[[${pageName}#${tgtId}|#${linkText}]]`;
+        copyToClipboard(fullLink);
+        const originalText = popupLink.textContent;
+        popupLink.textContent = 'Copied!';
+        setTimeout(() => {
+            popupLink.textContent = originalText;
+            scheduleHidePopup(300);
+        }, 900);
+    });
+
+    // Keep popup visible while hovering it
+    popup.addEventListener('mouseenter', function () {
+        clearTimeout(hideTimer);
+    });
+    popup.addEventListener('mouseleave', function () {
+        scheduleHidePopup(120);
+    });
+
+    // Helper to attach events to a single <sup> if not already attached
+    function attachToSup(sup) {
+        if (!sup || sup.dataset.qeecAttached) return;
         const supLink = sup.querySelector('a[href^="#cite_note-"]');
         if (!supLink) return;
-        let linkText = supLink.textContent.replace(/^\[|\]$/g, ''); // Remove surrounding brackets
+
+        // Compute link text similar to previous inline logic
+        let linkText = supLink.textContent.replace(/^\[|]$/g, ''); // Remove surrounding brackets
         let citeNoteStr = supLink.getAttribute('href').substring(11); // Remove '#cite_note-' prefix
         let citeRefStr = sup.id.substring(9); // Remove 'cite_ref-' prefix
         if (citeNoteStr !== citeRefStr) {
-            // e.g. "Smith2020-1" vs "Smith2020_1-0"
             const linkTextCommon = getCommonPrefix(citeNoteStr, citeRefStr);
-            citeNoteStr = citeNoteStr.substring(linkTextCommon.length + 1); // +1 to remove the underscore/hyphen
-            citeRefStr = citeRefStr.substring(linkTextCommon.length + 1); // +1 to remove the hyphen
+            citeNoteStr = citeNoteStr.substring(linkTextCommon.length + 1);
+            citeRefStr = citeRefStr.substring(linkTextCommon.length + 1);
             if (citeNoteStr !== citeRefStr) {
-                // e.g. "1" vs "1-0"
                 const linkTextCommon2 = getCommonPrefix(citeNoteStr, citeRefStr);
-                citeRefStr = citeRefStr.substring(linkTextCommon2.length + 1); // +1 to remove the hyphen
-                if (citeRefStr) {
-                    linkText = linkText + '.' + citeRefStr;
-                }
+                citeRefStr = citeRefStr.substring(linkTextCommon2.length + 1);
+                if (citeRefStr) linkText = linkText + '.' + citeRefStr;
             }
         }
 
-        const copyBtn = document.createElement('a');
-        copyBtn.className = 'qeec-ref-tag-copy-btn qeec-badge';
-        copyBtn.href = '#';
-        copyBtn.title = 'Copy citation permalink';
-        copyBtn.setAttribute('aria-label', 'Copy citation permalink');
-        copyBtn.textContent = 'Copy permalink';
-        copyBtn.style.marginRight = '2px';
-        // On click, copy the permalink to clipboard
-        copyBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const fullLink = `[[${permalink}#${sup.id}|#${linkText}]]`;
-            copyToClipboard(fullLink);
-            // Provide visual feedback
-            const originalText = copyBtn.textContent;
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => {
-                copyBtn.textContent = originalText;
-            }, 1000);
-        });
-        // Append the button to the sup element
-        sup.appendChild(copyBtn);
+        // Make sup focusable for keyboard users and show popup on focus
+        if (!sup.hasAttribute('tabindex')) sup.setAttribute('tabindex', '0');
+
+        // Show popup on hover or focus
+        const onShow = function () { showPopupForSup(sup, linkText); };
+        const onHide = function () { scheduleHidePopup(120); };
+
+        sup.addEventListener('mouseenter', onShow);
+        sup.addEventListener('mouseleave', onHide);
+        sup.addEventListener('focus', onShow);
+        sup.addEventListener('blur', onHide);
+
+        // Also if the inner anchor is focused (some skins make the inner link focusable)
+        supLink.addEventListener('focus', onShow);
+        supLink.addEventListener('blur', onHide);
+
+        sup.dataset.qeecAttached = '1';
+    }
+
+    // Attach to all existing sup elements
+    const supElements = document.querySelectorAll('sup[id^="cite_ref-"]');
+    supElements.forEach(attachToSup);
+
+    // Observe for dynamically added sup elements (e.g., collapsible content or AJAX)
+    const mo = new MutationObserver(muts => {
+        for (const m of muts) {
+            if (m.type === 'childList' && m.addedNodes && m.addedNodes.length) {
+                m.addedNodes.forEach(node => {
+                    if (!node || node.nodeType !== 1) return;
+                    if (node.matches && node.matches('sup[id^="cite_ref-"]')) {
+                        attachToSup(node);
+                    } else {
+                        const nested = node.querySelectorAll && node.querySelectorAll('sup[id^="cite_ref-"]');
+                        if (nested && nested.length) nested.forEach(attachToSup);
+                    }
+                });
+            }
+        }
     });
+    mo.observe(document.body, {childList: true, subtree: true});
 }
 
 function buildUI() {
