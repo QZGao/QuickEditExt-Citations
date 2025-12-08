@@ -43,24 +43,24 @@ sup[id^="cite_ref-"]:hover .qeec-ref-tag-copy-btn { display: inline-block; }
 }
 .qeec-ref-popup a.qeec-ref-popup-copy:active { opacity: 0.8; }
 
-@media (prefers-color-scheme: light) {
-  /* light mode: keep light look */
-  .qeec-ref-popup { 
-    background: #ffffff; 
-    color: #111827; 
-    border-color: #e5e7eb; 
-    box-shadow: 0 6px 12px rgba(16,24,40,0.06); 
-  }
+/* Explicit night mode via skin class */
+.skin-theme-clientpref-night .qeec-ref-popup { 
+  background: #111827; 
+  color: #ffffff; 
+  border-color: #374151; 
+  box-shadow: 0 6px 12px rgba(0,0,0,0.6); 
 }
-@media (prefers-color-scheme: dark) {
-  /* dark mode: dark background, light text, darker border */
-  .qeec-ref-popup { 
+.skin-theme-clientpref-night .qeec-ref-popup a.qeec-ref-popup-copy { color: inherit; }
+
+/* Follow system preference (skin-theme-clientpref-os) */
+@media screen and (prefers-color-scheme: dark) {
+  .skin-theme-clientpref-os .qeec-ref-popup { 
     background: #111827; 
     color: #ffffff; 
     border-color: #374151; 
     box-shadow: 0 6px 12px rgba(0,0,0,0.6); 
   }
-  .qeec-ref-popup a.qeec-ref-popup-copy { color: inherit; }
+  .skin-theme-clientpref-os .qeec-ref-popup a.qeec-ref-popup-copy { color: inherit; }
 }
 
 .qeec-badge { font-size: 10px; padding: 1px 4px; border-radius: 4px; background: #36c; color: #fff !important; animation: qeec-pop .9s ease; }
@@ -109,9 +109,15 @@ sup[id^="cite_ref-"]:hover .qeec-ref-tag-copy-btn { display: inline-block; }
 #${ids.settingsDialog} .qeec-close { position: absolute; top: 6px; right: 6px; border: 1px solid #a2a9b1; border-radius: 6px; background: #fff; cursor: pointer; padding: 0 6px; width: 24px; height: 24px; }
 #${ids.settingsDialog} fieldset { border: 0; margin: 8px 0 0 0; padding: 0; }
 #${ids.settingsDialog} legend { font-weight: 600; padding-left: 0; padding-bottom: 2px; font-size: 12px; }
-@media (prefers-color-scheme: dark) {
-  #${ids.settingsDialog} { background: #222; border-color: #444; box-shadow: 0 12px 24px rgba(0,0,0,.45); }
-  #${ids.settingsDialog} .qeec-close { background: #222; border-color: #444; }
+
+/* Explicit night mode via skin class */
+.skin-theme-clientpref-night #${ids.settingsDialog} { background: #222; border-color: #444; box-shadow: 0 12px 24px rgba(0,0,0,.45); }
+.skin-theme-clientpref-night #${ids.settingsDialog} .qeec-close { background: #222; border-color: #444; }
+
+/* Follow system preference (skin-theme-clientpref-os) */
+@media screen and (prefers-color-scheme: dark) {
+  .skin-theme-clientpref-os #${ids.settingsDialog} { background: #222; border-color: #444; box-shadow: 0 12px 24px rgba(0,0,0,.45); }
+  .skin-theme-clientpref-os #${ids.settingsDialog} .qeec-close { background: #222; border-color: #444; }
 }
 
 .qeec-actions { display: flex; align-items: center; gap: 6px; }
@@ -176,13 +182,27 @@ sup[id^="cite_ref-"]:hover .qeec-ref-tag-copy-btn { display: inline-block; }
 #${ids.root}.is-expanded #${ids.collapsedBtn} { display: none; }
 
 @media print { #${ids.root} { display: none !important; } }
-@media (prefers-color-scheme: dark) {
-  #${ids.root} { color: #e6e6e6; }
-  #${ids.collapsedBtn}, #${ids.panel}, .qeec-icon-btn { background: #222; border-color: #444; }
-  #${ids.header} { background: #1c1c1c; border-bottom-color: #333; }
-  #${ids.body} .qeec-placeholder { color: #bbb; }
-  #${ids.list} .qeec-content { color: #c7c7c7; }
-  #${ids.body} .qeec-topbar { background: #1e1e1e; border-color: #444; }
+
+/* Explicit night mode via skin class */
+.skin-theme-clientpref-night #${ids.root} { color: #e6e6e6; }
+.skin-theme-clientpref-night #${ids.collapsedBtn}, 
+.skin-theme-clientpref-night #${ids.panel}, 
+.skin-theme-clientpref-night .qeec-icon-btn { background: #222; border-color: #444; }
+.skin-theme-clientpref-night #${ids.header} { background: #1c1c1c; border-bottom-color: #333; }
+.skin-theme-clientpref-night #${ids.body} .qeec-placeholder { color: #bbb; }
+.skin-theme-clientpref-night #${ids.list} .qeec-content { color: #c7c7c7; }
+.skin-theme-clientpref-night #${ids.body} .qeec-topbar { background: #1e1e1e; border-color: #444; }
+
+/* Follow system preference (skin-theme-clientpref-os) */
+@media screen and (prefers-color-scheme: dark) {
+  .skin-theme-clientpref-os #${ids.root} { color: #e6e6e6; }
+  .skin-theme-clientpref-os #${ids.collapsedBtn}, 
+  .skin-theme-clientpref-os #${ids.panel}, 
+  .skin-theme-clientpref-os .qeec-icon-btn { background: #222; border-color: #444; }
+  .skin-theme-clientpref-os #${ids.header} { background: #1c1c1c; border-bottom-color: #333; }
+  .skin-theme-clientpref-os #${ids.body} .qeec-placeholder { color: #bbb; }
+  .skin-theme-clientpref-os #${ids.list} .qeec-content { color: #c7c7c7; }
+  .skin-theme-clientpref-os #${ids.body} .qeec-topbar { background: #1e1e1e; border-color: #444; }
 }
       `.trim();
     const style = document.createElement('style');
