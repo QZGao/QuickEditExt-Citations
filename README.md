@@ -1,5 +1,9 @@
 # QuickEditExt-Citations
 
+> ↔️ **ARCHIVE NOTICE**
+> 
+> This user script is no longer maintained, as all features have been migrated to the [Cite Forge](https://github.com/QZGao/CiteForge). Consider Cite Forge as an upgrade to this user script.
+
 Project page: [QuickEditExt-Citations](https://meta.wikimedia.org/wiki/User:SuperGrey/gadgets/QuickEditExt-Citations)
 
 This user script shows all named citations on the current page, in the format of `<ref name="ref-name">...</ref>`. To
